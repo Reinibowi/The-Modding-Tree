@@ -1,28 +1,63 @@
-addLayer("p", {
-    name: "prestige", // This is optional, only used in a few places, If absent it just uses the layer id.
-    symbol: "P", // This appears on the layer's node. Default is the id with the first letter capitalized
-    position: 0, // Horizontal position within a row. By default it uses the layer id and sorts in alphabetical order
-    startData() { return {
-        unlocked: true,
-		points: new Decimal(0),
-    }},
-    color: "#4BDC13",
-    requires: new Decimal(10), // Can be a function that takes requirement increases into account
-    resource: "prestige points", // Name of prestige currency
-    baseResource: "points", // Name of resource prestige is based on
-    baseAmount() {return player.points}, // Get the current amount of baseResource
-    type: "normal", // normal: cost to gain currency depends on amount gained. static: cost depends on how much you already have
-    exponent: 0.5, // Prestige currency exponent
-    gainMult() { // Calculate the multiplier for main currency from bonuses
-        mult = new Decimal(1)
-        return mult
+addLayer('t', {
+    name: "Tofls",
+    startData(){
+        return {
+            unlocked: true,
+            points: new Decimal(0)
+
+        }
     },
-    gainExp() { // Calculate the exponent on main currency from bonuses
-        return new Decimal(1)
+    color: "yellow",
+    resource: "Toflls",
+    row: 0,
+
+
+
+    upgrades:{
+        11: {
+            title: "Tofl-Increase",
+            description: "Unlocks the second Tofl-Buyable.",
+            cost: new Decimal(30),
+            currencyDisplayName: "Tofls",
+            currencyInternalName: "points",
+            onPurchase() {this.buyables[12].unlocked()}
+        }
     },
-    row: 0, // Row the layer is in on the tree (0 is the first row)
-    hotkeys: [
-        {key: "p", description: "P: Reset for prestige points", onPress(){if (canReset(this.layer)) doReset(this.layer)}},
-    ],
-    layerShown(){return true}
-})
+
+
+    buyables: {
+        11: {
+            title: "Tofl-Generation",
+            cost(x) { return {tofls: new Decimal(1).mul(new Decimal(2).pow(x))}},
+            effect(x) {
+                return x.div(10)
+            },
+            style: {
+                "border-radius": "0%",
+            },
+            display() { return "Start generating Tofls.\n +0.1 per level.\n\n Currently:  " + format(this.effect()) + " Tofls/sec\n\nCost: " + format(this.cost().tofls) + " Tofls" },
+            canAfford() { return player.points.gte(this.cost().tofls) },
+            buy() {
+                player.points = player.points.sub(this.cost().tofls)
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+        },
+        12: {
+            title: "Tofl-Multiplikation",
+            cost(x) { return {tofls: new Decimal(1).mul(new Decimal(5).pow(x))}},
+            effect(x) {
+                return x.mul(1.2)
+            },
+            style: {
+                "border-radius": "0%",
+            },
+            display() { return "Multiply Tofl-Generation by 1.2\n\n Currently:  " + format(this.effect()) + " \n\nCost: " + format(this.cost().tofls) + " Tofls" },
+            canAfford() { return player.points.gte(this.cost().tofls) },
+            buy() {
+                player.points = player.points.sub(this.cost())
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+            unlocked() {if (hasUpgrade(this.layer, 11)) {true} else {false}},
+        }
+    },
+ })

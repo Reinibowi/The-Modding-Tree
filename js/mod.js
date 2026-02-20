@@ -1,12 +1,13 @@
 let modInfo = {
-	name: "The ??? Tree",
-	author: "nobody",
-	pointsName: "points",
+	name: "The Tofl Tree :3",
+	id: "tofl_tree",
+	author: "Kuro",
+	pointsName: "Tofls",
 	modFiles: ["layers.js", "tree.js"],
 
 	discordName: "",
 	discordLink: "",
-	initialStartPoints: new Decimal (10), // Used for hard resets and new players
+	initialStartPoints: new Decimal (1), // Used for hard resets and new players
 	offlineLimit: 1,  // In hours
 }
 
@@ -41,7 +42,11 @@ function getPointGen() {
 	if(!canGenPoints())
 		return new Decimal(0)
 
-	let gain = new Decimal(1)
+	let gain = new Decimal(0)
+
+	if (getBuyableAmount("t", 11).gte(1)) gain = gain.add(buyableEffect("t", 11))
+	if (getBuyableAmount("t", 12).gte(1)) gain = gain.mul(buyableEffect("t", 12))
+
 	return gain
 }
 
