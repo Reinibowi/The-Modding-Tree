@@ -2,7 +2,7 @@ let modInfo = {
 	name: "The Tofl Tree :3",
 	id: "tofl_tree",
 	author: "Kuro",
-	pointsName: "Tofls",
+	pointsName: "Ghosts",
 	modFiles: ["layers.js", "tree.js"],
 
 	discordName: "",
