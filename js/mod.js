@@ -2,7 +2,7 @@ let modInfo = {
 	name: "The Tofl Tree :3",
 	id: "tofl_tree",
 	author: "Kuro",
-	pointsName: "Ghosts",
+	pointsName: "Euro",
 	modFiles: ["layers.js", "tree.js"],
 
 	discordName: "",
@@ -13,14 +13,18 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.0",
-	name: "Literally nothing",
+	num: "0.2",
+	name: "Herbsti",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
-	<h3>v0.0</h3><br>
-		- Added things.<br>
-		- Added stuff.`
+	<h3> v0.2 </h3><br>
+		- Herbsti Layer beendet<br>
+	<br>
+	<h3>v0.1</h3><br>
+		- Spiel existiert<br>
+		- Tofl Layer<br>
+		- Herbsti Layer`
 
 let winText = `Congratulations! You have reached the end and beaten this game, but for now...`
 
@@ -44,9 +48,21 @@ function getPointGen() {
 
 	let gain = new Decimal(0)
 
+	//Tofl
+
+	if (hasUpgrade("t", 11)) gain = gain.add(0.1)
+	if (hasUpgrade("t", 14)) gain = gain.mul(upgradeEffect("t", 14))
+
+
 	if (getBuyableAmount("t", 11).gte(1)) gain = gain.add(buyableEffect("t", 11))
 	if (getBuyableAmount("t", 12).gte(1)) gain = gain.mul(buyableEffect("t", 12))
 	if (getBuyableAmount("t", 13).gte(1)) gain = gain.pow(buyableEffect("t", 13))
+
+	//Herbsti
+
+	if (hasUpgrade("h", 11)) gain = gain.add(0.1)
+
+	if (layers["h"].read().gte(1)) gain = gain.mul(layers["h"].read())
 
 	return gain
 }
