@@ -13,11 +13,14 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.2",
-	name: "Herbsti",
+	num: "0.3",
+	name: "Kuro",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3> v0.3 </h3><br>
+		- Kuro-Layer angefangen<br>
+	<br>
 	<h3> v0.2 </h3><br>
 		- Herbsti Layer beendet<br>
 	<br>
@@ -63,6 +66,11 @@ function getPointGen() {
 	if (hasUpgrade("h", 11)) gain = gain.add(0.1)
 
 	if (layers["h"].read().gte(1)) gain = gain.mul(layers["h"].read())
+
+	//Kuro
+
+	if (hasUpgrade("k", 11)) gain = gain.add(0.1)
+
 
 	return gain
 }

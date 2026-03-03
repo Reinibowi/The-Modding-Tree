@@ -258,3 +258,104 @@ addLayer("h", {
         },
     }
  })
+
+addLayer("k", {
+    name: "Kuro",
+    startData(){
+        return {
+            points: new Decimal(0), 
+            gachaChance: new Decimal(1), 
+            pity: new Decimal(0), 
+            maxPity: new Decimal(200),
+            price: new Decimal(5), 
+            gachaCost: new Decimal(1),
+        }
+    }, 
+    color: "blue",
+    resource: "Gacha",
+    row: 0,
+    baseResource: "points", 
+    baseAmount(){return player.points},
+    requires: new Decimal(1),
+    type: "normal",
+    exponent: 0.5, 
+
+    tabFormat:{
+        "Main": {
+            content: ["main-display", "prestige-button", "upgrades"]
+        },
+        "Gacha": {
+            content: ["main-display", ["bar", "pityBar"], "clickables", "buyables"]
+        }
+    },
+
+    upgrades: {
+        11: {
+            description: "Starte die Eurogeneration. +0.1 Euro/sec.",
+            cost: new Decimal(1),
+        },
+        12: {
+            description: "Schalte Buyables frei.",
+            cost: new Decimal(5),
+        }
+    }, 
+
+    bars: {
+        pityBar: {
+            direction: RIGHT,
+            width: 500,
+            height: 50,
+            fillStyle: {
+                "background-color": "blue",
+            },
+            display() {return "Gacha-pity: " + format(player[this.layer].pity) + "/" + format(player[this.layer].maxPity)},
+            progress() {return new Decimal(player[this.layer].pity).div(player[this.layer].maxPity)},
+            unlocked: true,
+        },
+    },
+
+    clickables: {
+        11:{
+            title: "GACHA!", 
+            display() {return "GACHA GACHA GACHA: Rolle für Euros.\n\nAktuelle Gewinnchance: "+ format(player[this.layer].gachaChance) +"% \n\nAktueller Preis: " + format(player[this.layer].price) + " Euro\n\nKosten: " + format(player[this.layer].gachaCost + " Gacha")},
+            canClick() {return player[this.layer].points.gte(player[this.layer].gachaCost)}, 
+            onClick() {
+                player[this.layer].points = player[this.layer].points.sub(player[this.layer].gachaCost)
+                let number = 0
+                number = Math.random()*100 
+                if(player[this.layer].gachaChance.gte(100-number)){
+                    player.points = player.points.add(player[this.layer].price)
+                    player[this.layer].pity = new Decimal(0)
+                }else{
+                    player[this.layer].pity = player[this.layer].pity.add(1)
+                    if (player[this.layer].pity.gte(player[this.layer].maxPity)) {
+                        player[this.layer].pity = new Decimal(0)
+                        player.points = player.points.add(player[this.layer].price)
+
+                    }
+                }
+            }, 
+            style: {
+                "width": "300px", 
+                "height": "100px", 
+                "border-radius": "1%"
+            }
+        }
+    },
+
+
+    buyables: {
+        11:{
+            title: "Spezielle Banner",
+            description() {return "Erhöht das Preisgeld um 2%"},
+            cost(x) {return {gacha: new Decimal(5).mul(new Decimal(2).pow(x))}},
+            canAfford() {return player[this.layer].points.gte(this.cost().gacha)},
+            buy(){
+                player[this.layer].points = player[this.layer].points.sub(this.cost().gacha)
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+                player[this.layer].price = player[this.layer].price.mul(1.02)
+            },
+            unlocked() {return hasUpgrade(this.layer, 12)}
+        }
+    }
+ })
