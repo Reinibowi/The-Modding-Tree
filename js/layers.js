@@ -269,6 +269,7 @@ addLayer("k", {
             maxPity: new Decimal(200),
             price: new Decimal(5), 
             gachaCost: new Decimal(1),
+            lastWin: "nothing"
         }
     }, 
     color: "blue",
@@ -285,7 +286,23 @@ addLayer("k", {
             content: ["main-display", "prestige-button", "upgrades"]
         },
         "Gacha": {
-            content: ["main-display", ["bar", "pityBar"], "clickables", "buyables"]
+            content: ["main-display", "blank", ["bar", "pityBar"], "blank", "clickables", 
+            "blank", ["display-text", 
+                function() {
+                    if (player[this.layer].lastWin == "nothing"){
+                        return ""
+                    }
+                    if (player[this.layer].lastWin == "win"){
+                        return "Du hast gewonnen! Preisgeld erhalten!"
+                    }
+                    if (player[this.layer].lastWin == "lose"){
+                        return "Du hast verloren."
+                    }
+                    if (player[this.layer].lastWin == "pity"){
+                        return "Du hast das maximale Pity erreicht. Preisgeld erhalten."
+                    }
+                }
+            ], "blank", "buyables"]
         }
     },
 
@@ -326,12 +343,14 @@ addLayer("k", {
                 if(player[this.layer].gachaChance.gte(100-number)){
                     player.points = player.points.add(player[this.layer].price)
                     player[this.layer].pity = new Decimal(0)
+                    player[this.layer].lastWin = "win"
                 }else{
                     player[this.layer].pity = player[this.layer].pity.add(1)
+                    player[this.layer].lastWin = "lose"
                     if (player[this.layer].pity.gte(player[this.layer].maxPity)) {
                         player[this.layer].pity = new Decimal(0)
                         player.points = player.points.add(player[this.layer].price)
-
+                        player[this.layer].lastWin = "pity"
                     }
                 }
             }, 
@@ -347,7 +366,7 @@ addLayer("k", {
     buyables: {
         11:{
             title: "Spezielle Banner",
-            description() {return "Erhöht das Preisgeld um 2%"},
+            display() {return "Erhöht das Preisgeld um 2%\n\nKosten: " + format(this.cost().gacha)+ " Gacha"},
             cost(x) {return {gacha: new Decimal(5).mul(new Decimal(2).pow(x))}},
             canAfford() {return player[this.layer].points.gte(this.cost().gacha)},
             buy(){
@@ -356,6 +375,31 @@ addLayer("k", {
                 player[this.layer].price = player[this.layer].price.mul(1.02)
             },
             unlocked() {return hasUpgrade(this.layer, 12)}
+        }, 
+        12:{
+            title: "Geld investieren",
+            display() {return "Verbessert die Chance auf gewinnen\n\nKosten: " + format(this.cost().gacha)+ " Gacha"},
+            cost(x) {return {gacha: new Decimal(10).mul(new Decimal(3).pow(x))}},
+            canAfford() {return player[this.layer].points.gte(this.cost().gacha)},
+            buy(){
+                player[this.layer].points = player[this.layer].points.sub(this.cost().gacha)
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+                player[this.layer].gachaChance = player[this.layer].gachaChance.add((new Decimal(100).sub(new Decimal(player[this.layer].gachaChance))).mul(0.05))
+            },
+            unlocked() {return hasUpgrade(this.layer, 12)}
+        },
+        13:{
+            title: "Updates",
+            display() {return "Reduziert maximales Pity um 1\n\nKosten: " + format(this.cost().gacha)+ " Gacha"},
+            cost(x) {return {gacha: new Decimal(20).mul(new Decimal(1.76).pow(x))}},
+            canAfford() {return player[this.layer].points.gte(this.cost().gacha)},
+            buy(){
+                player[this.layer].points = player[this.layer].points.sub(this.cost().gacha)
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+                player[this.layer].maxPity = player[this.layer].maxPity.sub(1)
+            },
+            unlocked() {return hasUpgrade(this.layer, 12)},
+            purchaseLimit: 190
         }
     }
  })
