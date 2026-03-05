@@ -280,6 +280,15 @@ addLayer("k", {
     requires: new Decimal(1),
     type: "normal",
     exponent: 0.5, 
+    update(){
+        let priceGain = new Decimal(5)
+
+        priceGain = priceGain.mul(new Decimal(1.02).pow(getBuyableAmount("k", 11)))
+        
+        if(hasUpgrade("k", 13)) priceGain = priceGain.mul(upgradeEffect("k", 13))
+
+        player[this.layer].price = priceGain
+    },
 
     tabFormat:{
         "Main": {
@@ -314,7 +323,12 @@ addLayer("k", {
         12: {
             description: "Schalte Buyables frei.",
             cost: new Decimal(5),
-        }
+        },
+        13: {
+            description() { return "Die Menge an Gacha, die du hast, erhöht das Preisgeld. Aktuell: *" + format(this.effect())},
+            cost: new Decimal(100), 
+            effect() {return new Decimal(player[this.layer].points).log10().add(1)}
+         }
     }, 
 
     bars: {
@@ -372,7 +386,6 @@ addLayer("k", {
             buy(){
                 player[this.layer].points = player[this.layer].points.sub(this.cost().gacha)
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
-                player[this.layer].price = player[this.layer].price.mul(1.02)
             },
             unlocked() {return hasUpgrade(this.layer, 12)}
         }, 
