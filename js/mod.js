@@ -9,15 +9,23 @@ let modInfo = {
 	discordLink: "",
 	initialStartPoints: new Decimal (1), // Used for hard resets and new players
 	offlineLimit: 1,  // In hours
+	isEndgame(){
+		return player.points.get(new Decimal(1000000))
+	}
 }
+
 
 // Set your version in num and name
 let VERSION = {
-	num: "0.3",
-	name: "Kuro",
+	num: "1.0",
+	name: "Phase 1",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
+	<h3> v1.0 </h3>><br>
+		- Brontalo Layer hinzugefügt.><br>
+		- Kuro Layer beendet.><br>
+		- Aktuelles Endgame ist 1.000.000 Euro.><br>><br>
 	<h3> v0.3 </h3><br>
 		- Kuro-Layer angefangen<br>
 	<br>
@@ -64,13 +72,21 @@ function getPointGen() {
 	//Herbsti
 
 	if (hasUpgrade("h", 11)) gain = gain.add(0.1)
+	if (hasUpgrade("h", 14)) gain = gain.mul(upgradeEffect("h", 14))
 
 	if (layers["h"].read().gte(1)) gain = gain.mul(layers["h"].read())
 
 	//Kuro
 
 	if (hasUpgrade("k", 11)) gain = gain.add(0.1)
+	if (hasUpgrade("k", 14)) gain = gain.mul(upgradeEffect("k", 14))
 
+	//Brontalo
+
+	if (hasUpgrade("b", 11)) gain = gain.add(0.1)
+	if (hasUpgrade("b", 14)) gain = gain.mul(upgradeEffect("b", 14))
+	
+	gain = gain.mul(layers["b"].euroBoost())
 
 	return gain
 }

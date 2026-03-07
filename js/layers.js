@@ -12,6 +12,7 @@ addLayer('t', {
     baseResource: "points",
     baseAmount() {return player.points},
     row: 0,
+    position: 0, 
     type: "normal",
     exponent: 0.5,
     base: 1,
@@ -27,11 +28,14 @@ addLayer('t', {
 
     tabFormat: {
         "Main": {
-            content: ["main-display", "prestige-button", "upgrades"]
+            content: ["main-display", "blank", "prestige-button", "blank", "upgrades"]
         },
         "Tees": {
-            content: ["main-display", "buyables"]
+            content: ["main-display", "blank", "buyables"]
         }, 
+        "Erklärung": {
+            content: [["infobox", "tee"]]
+        }
     },
 
 
@@ -50,7 +54,7 @@ addLayer('t', {
         },
         14: {
             description() {return "Samen multiplizieren Europroduktion: *log(Samen+1)\n\n Aktuell: "+format(this.effect())}, 
-            effect() {return (new Decimal(player[this.layer].points)).log10().add(1)},
+            effect() {return (new Decimal(player[this.layer].points)).add(1).log10().add(1)},
             cost: new Decimal(500)
         }
     },
@@ -126,6 +130,15 @@ addLayer('t', {
             unlocked() {return hasUpgrade(this.layer, 13)}
         }
     },
+
+    infoboxes: {
+        tee: {
+            title: "Tee", 
+            body() {
+                return "Tofls Methode um Geld zu machen ist es Tee anzupflanzen und zu verkaufen. Resette deine Euros für Samen und nutze die Samen um Tee zu pflanzen mit verschiedenen Effekten."
+            }
+        }
+    }
 })
 
 addLayer("h", {
@@ -145,6 +158,7 @@ addLayer("h", {
     baseResource: "points",
     baseAmount() {return player.points},
     row: 0,
+    position: 1, 
     type: "normal",
     exponent: 0.5,
     requires: new Decimal(1),
@@ -164,10 +178,13 @@ addLayer("h", {
 
     tabFormat:{
         "Main": {
-            content: ["main-display", "prestige-button"]
+            content: ["main-display", "blank", "prestige-button", "blank", "upgrades"]
         },
         "Read": {
-            content: ["main-display", ["bar", "readBar"], "clickables", "upgrades", "buyables"]
+            content: ["main-display", "blank", ["bar", "readBar"], "blank", "clickables", "blank",  "buyables"]
+        },
+        "Erklärung": {
+            content: [["infobox", "buecher"]]
         }
     },
 
@@ -256,6 +273,15 @@ addLayer("h", {
             },
             unlocked() {return hasUpgrade(this.layer, 12)}
         },
+    }, 
+
+    infoboxes: {
+        buecher: {
+            title: "Bücher", 
+            body() {
+                return "Herbstis Methode um Geld zu machen ist es Bücher zu lesen und das Wissen daraus zu nutzen. Resette dene Euros für Bücher und lese diese, indem du den Button für Lesen gedrückt hältst. Das Boostet deine Europroduktion. Mit den Büchern kannst du bestimmte Dinge um die Leseleiste verbessern."
+            }
+        }
     }
  })
 
@@ -272,9 +298,10 @@ addLayer("k", {
             lastWin: "nothing"
         }
     }, 
-    color: "blue",
+    color: "aqua",
     resource: "Gacha",
     row: 0,
+    position: 2, 
     baseResource: "points", 
     baseAmount(){return player.points},
     requires: new Decimal(1),
@@ -292,7 +319,7 @@ addLayer("k", {
 
     tabFormat:{
         "Main": {
-            content: ["main-display", "prestige-button", "upgrades"]
+            content: ["main-display", "blank", "prestige-button", "blank", "upgrades"]
         },
         "Gacha": {
             content: ["main-display", "blank", ["bar", "pityBar"], "blank", "clickables", 
@@ -312,6 +339,9 @@ addLayer("k", {
                     }
                 }
             ], "blank", "buyables"]
+        }, 
+        "Erklärung": {
+            content: [["infobox", "gacha"]]
         }
     },
 
@@ -327,8 +357,13 @@ addLayer("k", {
         13: {
             description() { return "Die Menge an Gacha, die du hast, erhöht das Preisgeld. Aktuell: *" + format(this.effect())},
             cost: new Decimal(100), 
-            effect() {return new Decimal(player[this.layer].points).log10().add(1)}
-         }
+            effect() {return (new Decimal(player[this.layer].points).max(1)).log10().add(1)}
+         },
+        14: {
+            description() {return "Gacha multipliziert Europroduktion: *log(Gacha+1)\n\n Aktuell: "+format(this.effect())}, 
+            effect() {return (new Decimal(player[this.layer].points)).add(1).log10().add(1)},
+            cost: new Decimal(500)
+        }
     }, 
 
     bars: {
@@ -414,5 +449,161 @@ addLayer("k", {
             unlocked() {return hasUpgrade(this.layer, 12)},
             purchaseLimit: 190
         }
+    }, 
+
+    infoboxes: {
+        gacha: {
+            title: "Gacha", 
+            body(){
+                return "Kuros Methode um Geld zu machen ist es in Gacha zu investieren mit der Hoffnung auf den großen Sieg. Restte für Gacha und gib Gacha aus um zu rollen. Die Gewinnchance und Preisgeld sind festgelegt. Solltest du verlieren erhöht sich die Pity-Leiste. Wenn diese voll ist, gewinnst du beim nächsten Pull, auch wenn du hättest verlieren sollen. Mit Gacha können verschiedene Aspekte des Systems verbessert werden."
+            }
+        }
     }
  })
+
+addLayer("b", {
+    name: "Brontalo",
+    color: "orange", 
+    resource: "Taschenrechner",
+    row: 0,
+    position: 3, 
+    type: "normal",
+    baseResource: "points",
+    baseAmount() {return player.points},
+    requires: new Decimal(1),
+    exponent: 0.1,
+    startData(){ return {
+        points: new Decimal(0),
+        unlocked: true,
+        a: new Decimal(0.1),
+        b: new Decimal(0.1),
+
+        result: new Decimal(1)
+    }},
+
+    gainExp() {
+        let gain = new Decimal(1)
+
+        if (hasUpgrade(this.layer, 12)) gain = gain.add(2)
+
+        return gain
+    },
+
+    update(){
+        let resultGain = new Decimal(0)
+        resultGain = resultGain.add(new Decimal(player[this.layer].points).mul(player[this.layer].a))
+        if (hasUpgrade(this.layer, 13)) resultGain = resultGain.add((new Decimal(player[this.layer].points).pow(2)).mul(player[this.layer].b))
+    
+        player[this.layer].result = resultGain
+    },
+
+
+    euroBoost(){
+        return (new Decimal(player[this.layer].result).add(1)).log10().add(1)
+    },
+
+    formulaLabel(){
+        if (hasUpgrade(this.layer, 13)){
+            return "" + format(player[this.layer].a) + "x + " + format(player[this.layer].b) + "x^2 = " + format(player[this.layer].result) 
+        }else{
+            return "" + format(player[this.layer].a) + "x = " + format(player[this.layer].result) 
+        }
+    },
+
+    boosLabel(){
+        return "Boost auf Euro-Generation: *" + format(layers.b.euroBoost())
+    },
+
+    tabFormat:{
+        "Main": {
+            content: ["main-display", "blank", "prestige-button", "blank", "upgrades"]
+        },
+        "Formel": {
+            content: ["main-display", "blank", ["display-text", () => layers.b.formulaLabel(), {"font-size": "40px"}], "blank", ["display-text", () => layers.b.boosLabel()], "blank", "buyables"]
+        }, 
+        "Erklärung": {
+            content: [["infobox", "taschenrechner"]]
+        }
+    },
+
+    upgrades:{
+        11: {
+            description: "Starte die Euro-Generation: +0.1/sec", 
+            cost: new Decimal(1)
+        }, 
+        12: {
+            description: "Verbessere die Formel für Taschenrechner-Erhalt: Euro^0.1 -> Euro^0.3", 
+            cost: new Decimal(3)
+        }, 
+        13: {
+            description: "Schalte b und sein Buyable frei", 
+            cost: new Decimal(100)
+        }, 
+        14: {
+            description() {return "Taschenrechner multiplizieren Europroduktion: *log(Taschenrechner+1)\n\n Aktuell: "+format(this.effect())}, 
+            effect() {return (new Decimal(player[this.layer].points)).add(1).log10().add(1)},
+            cost: new Decimal(500)
+        }
+    }, 
+
+    buyables:{
+        11:{
+            title: "A erhöhen",
+            display() {return "Erhöhe a um 0.1\n\nKosten: " + format(this.cost().taschenrechner)+ " Taschenrechner"},
+            cost(x) {return {taschenrechner: new Decimal(1).mul(new Decimal(2).pow(x))}},
+            canAfford() {return player[this.layer].points.gte(this.cost().taschenrechner)},
+            buy(){
+                player[this.layer].points = player[this.layer].points.sub(this.cost().taschenrechner)
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+                player[this.layer].a = player[this.layer].a.add(0.1)
+            },
+            unlocked() {return true}
+        }, 
+        12:{
+            title: "B erhöhen",
+            display() {return "Erhöhe b um 0.01\n\nKosten: " + format(this.cost().taschenrechner)+ " Taschenrechner"},
+            cost(x) {return {taschenrechner: new Decimal(10).mul(new Decimal(2).pow(x))}},
+            canAfford() {return player[this.layer].points.gte(this.cost().taschenrechner)},
+            buy(){
+                player[this.layer].points = player[this.layer].points.sub(this.cost().taschenrechner)
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+                player[this.layer].b = player[this.layer].b.add(0.01)
+            },
+            unlocked() {return hasUpgrade(this.layer, 13)}
+        }, 
+    }, 
+
+    infoboxes: {
+        taschenrechner:{
+            title: "Taschenrechner", 
+            body(){
+                return "Brontalos Methode um Geld zu machen ist es einen möglichst große Formel auszurechnen und daraus Geld zu generieren. Unter dem Tab >>Formel<< steht eine Formel mit x. X ist die Anzahl der Taschenrechner die du hast. der Koeffizient kann verbessert werden mit Taschenrechnern. Das Ergebnis der Rechnung ist Grundlage für den Euro-generations-boost."
+            }
+        }
+    }
+})
+
+addLayer("lore", {
+
+    tabFormat:{
+        "Lore": {
+            content:[["infobox", "lore"]]
+        }
+    },
+
+    infoboxes: {
+        lore:{
+            title: "lore", 
+            body(){
+                return "Es war ein schöner Tag in Kümmel. Tofl und Freunde laufen entspannt durch die umtriebigen Straßen. Plötzlich jedoch sieht Tofl etwas in einem Schaufenster! Eine Tafel Schokolade (vergan natürlich), für nur... 10^^10^308 Euro!!!! Was für ein Schnäppchen! <br>Herbsti >>Wie viel soll das denn sein?<< <br>Tofl: >>Mir egal! Ich will die haben!<< <br>Brontalo: >>Das... sind 10 hoch 10 hoch 10 hoch... und so weiter und das 10 hoch 308 mal! Das ist keine Zahl, die irgendjemand sich je vorstellen kann!<< <br>Tofl: >>Ich kann mir alles vorstellen!<< <br>Herbsti: >>Also genaugenommen sind der menschlichen Vorstellungskraft keine Grenzen gesetzt. Wenn man das philosophisch betrachtet...<< <br>Kuro: >>Egal, ob wir uns das jetzt vorstellen können, oder nicht. Wir haben nicht so viel Geld!<< <br>Tofl: >>Dann müssen wir uns eben bei unseren Bootstraps together pullen und das Geld auftreiben!<< <br>Herbsti: >>Gibt es nicht nur 1,6 Billionen Euro überhaupt?<< <br>Brontalo: >>Tofl, ich glaube du unterschätzt, wie viel das wirklich ist...<< <br>Tofl: >>Pscht! Wir werden dieses Geld zusammnbekommen! Und ihr helft mit! Ich will diese Schokolade!<< <br> Kuro: >>Wieso müssen wir jetzt helfen!!!<< <br>Und so machten sich Tofl und ihre Truppe auf, 10^^10^308 Euro zu beschaffen. Jeder hatte eine andere Methode Geld zu machen, doch zusammen würden sie es bestimmt schaffen. Bestimmt..."
+            }
+        }
+    },
+    startData(){
+        return {
+            unlocked: true,
+            points: new Decimal(0)
+        }
+    },
+    row: "side"
+})
