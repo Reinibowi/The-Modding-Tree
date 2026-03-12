@@ -63,7 +63,9 @@ addLayer('t', {
     buyables: {
         11: {
             title: "Minztee",
-            cost(x) { return {samen: new Decimal(2).pow(x.sub(getBuyableAmount(this.layer, 14)))}},
+            cost(x) { return {samen: getBuyableAmount("t", 11).lte(15) 
+                ? new Decimal(2).pow(x.sub(getBuyableAmount(this.layer, 14)))
+                : new Decimal(2).pow(x.sub(getBuyableAmount(this.layer, 14)).mul(1.5))}},
             effect(x) {
                 return (new Decimal(0.1)).mul(x)
             },
@@ -79,7 +81,9 @@ addLayer('t', {
         },
         12: {
             title: "Früchtetee",
-            cost(x) { return {samen: new Decimal(3).mul(new Decimal(3).pow(x.sub(getBuyableAmount(this.layer, 14))))}},
+            cost(x) { return {samen: getBuyableAmount("t", 12).lte(10)
+                ? new Decimal(3).mul(new Decimal(3).pow(x.sub(getBuyableAmount(this.layer, 14))))
+                : new Decimal(3).mul(new Decimal(3).pow(x.sub(getBuyableAmount(this.layer, 14)).mul(1.5)))}},
             effect(x) {
                 return new Decimal(1.2).pow(x)
             },
@@ -96,7 +100,9 @@ addLayer('t', {
         }, 
         13: {
             title: "Grüntee",
-            cost(x) { return {samen: new Decimal(50).mul(new Decimal(20).pow(x.sub(getBuyableAmount(this.layer, 14))))}},
+            cost(x) { return {samen: getBuyableAmount("t", 13).lte(5)
+                ? new Decimal(50).mul(new Decimal(20).pow(x.sub(getBuyableAmount(this.layer, 14))))
+                : new Decimal(50).mul(new Decimal(20).pow(x.sub(getBuyableAmount(this.layer, 14)).mul(1.5)))}},
             effect(x) {
                 return (x.mul(0.05)).add(1)
             },
@@ -113,7 +119,9 @@ addLayer('t', {
         }, 
         14: {
             title: "Matchatee", 
-            cost(x) {return {samen: new Decimal(100).mul(new Decimal(10).pow(x))}}, 
+            cost(x) {return {samen: getBuyableAmount("t", 14).lte(5)
+                ? new Decimal(100).mul(new Decimal(10).pow(x))
+                : new Decimal(100).mul(new Decimal(10).pow(x.mul(1.5)))}}, 
             effect(x){return x},
             style: {
                 "border-radius": "0%",
@@ -135,7 +143,7 @@ addLayer('t', {
         tee: {
             title: "Tee", 
             body() {
-                return "Tofls Methode um Geld zu machen ist es Tee anzupflanzen und zu verkaufen. Resette deine Euros für Samen und nutze die Samen um Tee zu pflanzen mit verschiedenen Effekten."
+                return "Tofls Methode um Geld zu machen ist es Tee anzupflanzen und zu verkaufen. Resette deine Euros für Samen und nutze die Samen um Tee zu pflanzen mit verschiedenen Effekten. Tees werden deutlich teurer ab einer bestimmten Menge des jeweiligen Tees."
             }
         }
     }
@@ -238,7 +246,9 @@ addLayer("h", {
     buyables: {
         11:{
             title: "Novelle",
-            cost(x) {return {buecher: (new Decimal(5)).mul(new Decimal(1.5).pow(x))}}, 
+            cost(x) {return {buecher: getBuyableAmount("h", 11).lte(20)
+                ? (new Decimal(5)).mul(new Decimal(1.5).pow(x))
+                : (new Decimal(5)).mul(new Decimal(1.5).pow(x.mul(1.2)))}}, 
             display() {return "Erhöhe den maximalen Multiplikator um +0.1\nAktuell: +" + format(new Decimal(0.1).mul(getBuyableAmount(this.layer, 11))) + "\n\nKosten: " + format(this.cost().buecher) + " Bücher"},
             canAfford() {return player[this.layer].points.gte(this.cost().buecher)},
             buy() {
@@ -263,7 +273,9 @@ addLayer("h", {
         }, 
         13:{
             title: "Sachbuch",
-            cost(x) {return {buecher: (new Decimal(10)).mul(new Decimal(3).pow(x))}}, 
+            cost(x) {return {buecher: getBuyableAmount("h", 13).lte(10)
+                ? (new Decimal(10)).mul(new Decimal(3).pow(x))
+                : (new Decimal(10)).mul(new Decimal(3).pow(x.mul(1.2)))}}, 
             display() {return "Erhöhe den minimalen Multiplikator um +0.1\nAktuell: +" + format(new Decimal(0.1).mul(getBuyableAmount(this.layer, 13))) + "\n\nKosten: " + format(this.cost().buecher) + " Bücher"},
             canAfford() {return player[this.layer].points.gte(this.cost().buecher)},
             buy() {
@@ -295,7 +307,8 @@ addLayer("k", {
             maxPity: new Decimal(200),
             price: new Decimal(5), 
             gachaCost: new Decimal(1),
-            lastWin: "nothing"
+            lastWin: "nothing",
+            timesWon: new Decimal(0)
         }
     }, 
     color: "aqua",
@@ -309,12 +322,16 @@ addLayer("k", {
     exponent: 0.5, 
     update(){
         let priceGain = new Decimal(5)
+        let maxPityGain = new Decimal(100)
 
-        priceGain = priceGain.mul(new Decimal(1.02).pow(getBuyableAmount("k", 11)))
+        priceGain = priceGain.mul(new Decimal(1.15).pow(getBuyableAmount("k", 11)))
         
         if(hasUpgrade("k", 13)) priceGain = priceGain.mul(upgradeEffect("k", 13))
 
         player[this.layer].price = priceGain
+
+        maxPityGain = maxPityGain.mul(new Decimal(0.5).pow(getBuyableAmount("k", 13)))
+        player[this.layer].maxPity = maxPityGain.mul(2)
     },
 
     tabFormat:{
@@ -337,6 +354,10 @@ addLayer("k", {
                     if (player[this.layer].lastWin == "pity"){
                         return "Du hast das maximale Pity erreicht. Preisgeld erhalten."
                     }
+                }
+            ], "blank", ["display-text", 
+                function() {
+                    return "Du hast bereits " + format(player[this.layer].timesWon) + " Mal gewonnen!"
                 }
             ], "blank", "buyables"]
         }, 
@@ -392,12 +413,14 @@ addLayer("k", {
                 if(player[this.layer].gachaChance.gte(100-number)){
                     player.points = player.points.add(player[this.layer].price)
                     player[this.layer].pity = new Decimal(0)
+                    player[this.layer].timesWon = player[this.layer].timesWon.add(1)
                     player[this.layer].lastWin = "win"
                 }else{
                     player[this.layer].pity = player[this.layer].pity.add(1)
                     player[this.layer].lastWin = "lose"
                     if (player[this.layer].pity.gte(player[this.layer].maxPity)) {
                         player[this.layer].pity = new Decimal(0)
+                        player[this.layer].timesWon = player[this.layer].timesWon.add(1)
                         player.points = player.points.add(player[this.layer].price)
                         player[this.layer].lastWin = "pity"
                     }
@@ -415,8 +438,8 @@ addLayer("k", {
     buyables: {
         11:{
             title: "Spezielle Banner",
-            display() {return "Erhöht das Preisgeld um 2%\n\nKosten: " + format(this.cost().gacha)+ " Gacha"},
-            cost(x) {return {gacha: new Decimal(5).mul(new Decimal(2).pow(x))}},
+            display() {return "Erhöht das Preisgeld um 15%\n\nKosten: " + format(this.cost().gacha)+ " Gacha"},
+            cost(x) {return {gacha: new Decimal(5).mul(new Decimal(1.2).pow(x))}},
             canAfford() {return player[this.layer].points.gte(this.cost().gacha)},
             buy(){
                 player[this.layer].points = player[this.layer].points.sub(this.cost().gacha)
@@ -438,16 +461,14 @@ addLayer("k", {
         },
         13:{
             title: "Updates",
-            display() {return "Reduziert maximales Pity um 1\n\nKosten: " + format(this.cost().gacha)+ " Gacha"},
+            display() {return "Reduziert maximales Pity um 50%\n\nKosten: " + format(this.cost().gacha)+ " Gacha"},
             cost(x) {return {gacha: new Decimal(20).mul(new Decimal(1.76).pow(x))}},
             canAfford() {return player[this.layer].points.gte(this.cost().gacha)},
             buy(){
                 player[this.layer].points = player[this.layer].points.sub(this.cost().gacha)
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
-                player[this.layer].maxPity = player[this.layer].maxPity.sub(1)
             },
             unlocked() {return hasUpgrade(this.layer, 12)},
-            purchaseLimit: 190
         }
     }, 
 
@@ -499,7 +520,11 @@ addLayer("b", {
 
 
     euroBoost(){
-        return (new Decimal(player[this.layer].result).add(1)).log10().add(1)
+        if(player[this.layer].result.lte(200000)){ 
+            return (new Decimal(player[this.layer].result).add(1)).log10().add(1)
+        }else{
+            return (new Decimal(player[this.layer].result).add(1)).log10().add(1)
+        }
     },
 
     formulaLabel(){
@@ -577,7 +602,7 @@ addLayer("b", {
         taschenrechner:{
             title: "Taschenrechner", 
             body(){
-                return "Brontalos Methode um Geld zu machen ist es einen möglichst große Formel auszurechnen und daraus Geld zu generieren. Unter dem Tab >>Formel<< steht eine Formel mit x. X ist die Anzahl der Taschenrechner die du hast. der Koeffizient kann verbessert werden mit Taschenrechnern. Das Ergebnis der Rechnung ist Grundlage für den Euro-generations-boost."
+                return "Brontalos Methode um Geld zu machen ist es einen möglichst große Formel auszurechnen und daraus Geld zu generieren. Unter dem Tab >>Formel<< steht eine Formel mit x. X ist die Anzahl der Taschenrechner die du hast. der Koeffizient kann verbessert werden mit Taschenrechnern. Das Ergebnis der Rechnung ist Grundlage für den Euro-generations-boost. Ab einem Ergebnis von 200.000 wird der Bonus auf die Europroduktion gesoftcapped."
             }
         }
     }
@@ -606,4 +631,41 @@ addLayer("lore", {
         }
     },
     row: "side"
+})
+
+addLayer("debug", {
+    resource: "Debug Points",
+    type: "normal",
+    baseResource: "points",
+    baseAmount() {return player.points},
+    requires: new Decimal(1),
+    exponent: 1,
+    tabFormat: {
+        "Main": {
+            content: ["prestige-button", "buyables"]
+        }
+    }, 
+
+    startData() {
+        return {
+            unlocked: true,
+            points: new Decimal(0)
+        }
+    }, 
+    row: "side",
+
+    buyables: {
+        11: {
+            display() {
+                return "+1.000.000 Euro"
+            }, 
+            cost(x) {
+                return new Decimal(0)
+            }, 
+            canAfford: true, 
+            buy(){
+                player.points = player.points.add(1e6)
+            }
+        }
+    }
 })

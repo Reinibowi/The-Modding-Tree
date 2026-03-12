@@ -17,15 +17,17 @@ let modInfo = {
 
 // Set your version in num and name
 let VERSION = {
-	num: "1.0",
+	num: "1.1",
 	name: "Phase 1",
 }
 
 let changelog = `<h1>Changelog:</h1><br>
-	<h3> v1.0 </h3>><br>
-		- Brontalo Layer hinzugefügt.><br>
-		- Kuro Layer beendet.><br>
-		- Aktuelles Endgame ist 1.000.000 Euro.><br>><br>
+	<h3> v1.1 </h3><br>
+		- Balancing<br><br>
+	<h3> v1.0 </h3><br>
+		- Brontalo Layer hinzugefügt.<br>
+		- Kuro Layer beendet.<br>
+		- Aktuelles Endgame ist 1.000.000 Euro.<br><br>
 	<h3> v0.3 </h3><br>
 		- Kuro-Layer angefangen<br>
 	<br>
