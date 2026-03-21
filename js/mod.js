@@ -43,7 +43,7 @@ let winText = `Congratulations! You have reached the end and beaten this game, b
 
 // If you add new functions anywhere inside of a layer, and those functions have an effect when called, add them here.
 // (The ones here are examples, all official functions are already taken care of)
-var doNotCallTheseFunctionsEveryTick = ["blowUpEverything"]
+var doNotCallTheseFunctionsEveryTick = ["blowUpEverything", "changeValueI"]
 
 function getStartPoints(){
     return new Decimal(modInfo.initialStartPoints)
@@ -89,6 +89,10 @@ function getPointGen() {
 	if (hasUpgrade("b", 14)) gain = gain.mul(upgradeEffect("b", 14))
 	
 	gain = gain.mul(layers["b"].euroBoost())
+
+	//Immobilien
+
+	if (hasMilestone("i", 0)) gain = gain.mul(3)
 
 	return gain
 }
