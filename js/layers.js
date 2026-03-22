@@ -729,13 +729,54 @@ addLayer("i", {
             return false
         }
     },
-    type: "static",
+    type: "custom",
     baseResource: "points",
     baseAmount() {return player.points},
-    requires: new Decimal(1000000),
-    exponent: 2,
-    base: 2,
 
+
+    //AI code from here to
+    canBuyMax() { return true },
+
+    getResetGain() {
+        let current = player[this.layer].points
+        let points = player.points
+        let baseCost = new Decimal(1000000)
+        if (points.lt(baseCost)) return new Decimal(0)
+        // maxN = floor(log2(points / baseCost + 1))
+        let maxN = points.div(baseCost).add(1).log(2).floor()
+        return maxN.sub(current).max(0)
+    },
+
+    getNextAt(canMax = false) {
+        let current = player[this.layer].points
+        let baseCost = new Decimal(1000000)
+        if (canMax) {
+            // Cost for all you can afford
+            let points = player.points
+            if (points.lt(baseCost)) return baseCost
+            let maxN = points.div(baseCost).add(1).log(2).floor()
+            return baseCost.mul(new Decimal(2).pow(maxN).sub(1))
+        } else {
+            // Cost for next one
+            return baseCost.mul(new Decimal(2).pow(current))
+        }
+    },
+
+    canReset() {
+        return this.getResetGain().gt(0)
+    },
+
+    prestigeButtonText() {
+        let gain = this.getResetGain()
+        let nextAt = this.getNextAt(false)
+        return `Reset for +<b>${formatWhole(gain)}</b> Immobilien<br><br>Next at ${format(nextAt)} points`
+    },
+
+    prestigeNotify() {
+        return this.canReset()
+    },
+
+    //here
     update(){
         player[this.layer].time = player[this.layer].time.add(player[this.layer].timeRate)
         if(player[this.layer].time.gte(player[this.layer].maxTime)){
@@ -771,10 +812,10 @@ addLayer("i", {
 
     tabFormat: {
         "Main": {
-            content: ["main-display", "prestige-button", "milestones"]
+            content: ["main-display", "blank", "prestige-button", "blank", "milestones"]
         }, 
         "Markt":{
-            content: ["main-display", ["bar", "timeBar"], ["display-text", () => layers.i.currentValue(), {"font-size": "40px"}]]
+            content: ["main-display", "blank", ["bar", "timeBar"], "blank", ["display-text", () => layers.i.currentValue(), {"font-size": "40px"}], "blank", ["clickable", "sell"]]
         }
     },
 
@@ -787,9 +828,13 @@ addLayer("i", {
         }, 
         1: {
             requirementDescription: "2 Immobilien", 
-            effectDescription: "Neue Bückerupgrades", 
+            effectDescription: "Neue Bücherupgrades", 
             done() {return player[this.layer].points.gte(2)}
-        }
+        }, 
+        //2: {
+        //    requirementDescription: "3 Immobilien", 
+        //    effectDescription: ""
+        //}
     }, 
 
     bars: {
@@ -805,6 +850,20 @@ addLayer("i", {
             unlocked: true,
         },
     },
+
+    clickables: {
+        sell: {
+            title: "Immobilie verkaufen!",
+            canClick() {
+                return player[this.layer].points.gte(1)
+            },
+            onClick(){
+                player[this.layer].points = player[this.layer].points.sub(1)
+                player.points = player.points.add(player[this.layer].value)
+                player[this.layer].value = new Decimal("1e6")
+            }
+        }
+    }
 })
 
 addLayer("lore", {
