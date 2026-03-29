@@ -148,7 +148,7 @@ addLayer("b", {
         11:{
             title: "A erhöhen",
             display() {return "Erhöhe a um 0.1\n\nKosten: " + format(this.cost().taschenrechner)+ " Taschenrechner"},
-            cost(x) {return {taschenrechner: new Decimal(1).mul(new Decimal(2).pow(x)).div(new Decimal(1).mul(new Decimal(2).mul(getBuyableAmount(this.layer, 21))))}},
+            cost(x) {return {taschenrechner: new Decimal(1).mul(new Decimal(2).pow(x)).div(new Decimal(1).mul(new Decimal(2).pow(getBuyableAmount(this.layer, 21))))}},
             canAfford() {return player[this.layer].points.gte(this.cost().taschenrechner)},
             buy(){
                 player[this.layer].points = player[this.layer].points.sub(this.cost().taschenrechner)
@@ -160,7 +160,7 @@ addLayer("b", {
         12:{
             title: "B erhöhen",
             display() {return "Erhöhe b um 0.01\n\nKosten: " + format(this.cost().taschenrechner)+ " Taschenrechner"},
-            cost(x) {return {taschenrechner: new Decimal(10).mul(new Decimal(2).pow(x)).div(new Decimal(1).mul(new Decimal(2).mul(getBuyableAmount(this.layer, 21))))}},
+            cost(x) {return {taschenrechner: new Decimal(10).mul(new Decimal(2).pow(x)).div(new Decimal(1).mul(new Decimal(2).pow(getBuyableAmount(this.layer, 21))))}},
             canAfford() {return player[this.layer].points.gte(this.cost().taschenrechner)},
             buy(){
                 player[this.layer].points = player[this.layer].points.sub(this.cost().taschenrechner)
@@ -172,7 +172,7 @@ addLayer("b", {
         13: {
             title: "C erhöhen",
             display() {return "Erhöhe c um 0.001\n\nKosten: " + format(this.cost().taschenrechner)+ " Taschenrechner"},
-            cost(x) {return {taschenrechner: new Decimal(50).mul(new Decimal(2.5).pow(x)).div(new Decimal(1).mul(new Decimal(2).mul(getBuyableAmount(this.layer, 21))))}},
+            cost(x) {return {taschenrechner: new Decimal(50).mul(new Decimal(2.5).pow(x)).div(new Decimal(1).mul(new Decimal(2).pow(getBuyableAmount(this.layer, 21))))}},
             canAfford() {return player[this.layer].points.gte(this.cost().taschenrechner)},
             buy(){
                 player[this.layer].points = player[this.layer].points.sub(this.cost().taschenrechner)
@@ -183,7 +183,7 @@ addLayer("b", {
         }, 
         21: {
             title: "Kostenslasher", 
-            display() {return "Dividiere die Kosten der variablen-Buyables durch 2. \n Aktuell: " + format(getBuyableAmount(this.layer, this.id)) + "\n\nKosten: " + format(this.cost().taschenrechner)}, 
+            display() {return "Dividiere die Kosten der variablen-Buyables durch 2. \n Aktuell: " + format(new Decimal(2).pow(getBuyableAmount(this.layer, this.id))) + "\n\nKosten: " + format(this.cost().taschenrechner)}, 
             cost(x) {return {taschenrechner: new Decimal(100).mul(new Decimal(5).pow(x))}}, 
             canAfford() {return player[this.layer].points.gte(this.cost().taschenrechner)},
             buy(){

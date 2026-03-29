@@ -121,7 +121,7 @@ addLayer("i", {
         }, 
         "Markt":{
             content: ["main-display", "blank", ["bar", "timeBar"], "blank", ["display-text", () => layers.i.currentValue(), {"font-size": "40px"}], "blank", ["clickable", "sell"]],
-            unlocked() {return player["i"].points.gte(10)}
+            unlocked() {return hasMilestone("i", 8)}
         }
 
     },
@@ -163,12 +163,12 @@ addLayer("i", {
             effectDescription: "Immobilien bossten Euro-Generierung.", 
             done() {return player[this.layer].points.gte(7)}
         }, 
-        8: {
+        7: {
             requirementDescription: "8 Immobilien", 
             effectDescription: "Neue Teeupgrades", 
             done() {return player[this.layer].points.gte(8)}
         }, 
-        9: {
+        8: {
             requirementDescription: "10 Immobilien", 
             effectDescription: "Schalte den Markt frei", 
             done() {return player[this.layer].points.gte(10)}

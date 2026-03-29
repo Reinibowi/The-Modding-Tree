@@ -63,9 +63,18 @@ addLayer('t', {
     buyables: {
         11: {
             title: "Minztee",
-            cost(x) { return {samen: getBuyableAmount("t", 11).lte(15) 
-                ? new Decimal(2).pow(x.sub(getBuyableAmount(this.layer, 14)))
-                : new Decimal(2).pow(x.sub(getBuyableAmount(this.layer, 14)).mul(1.5))}},
+            cost(x) { 
+                let price = new Decimal(2)
+
+                getBuyableAmount("t", 11).lte(15) 
+                ? price = price.pow(x.sub(getBuyableAmount(this.layer, 14)))
+                : price = price.pow(x.sub(getBuyableAmount(this.layer, 14)).mul(1.5))
+
+                if(hasMilestone("i", 4)){
+                    price = price.div(player["i"].points.add().ln().add(1))
+                }
+
+                return {samen: price}},
             effect(x) {
                 return (new Decimal(0.1)).mul(x)
             },
@@ -81,9 +90,18 @@ addLayer('t', {
         },
         12: {
             title: "Früchtetee",
-            cost(x) { return {samen: getBuyableAmount("t", 12).lte(10)
-                ? new Decimal(3).mul(new Decimal(3).pow(x.sub(getBuyableAmount(this.layer, 14))))
-                : new Decimal(3).mul(new Decimal(3).pow(x.sub(getBuyableAmount(this.layer, 14)).mul(1.5)))}},
+            cost(x) {
+                let price = new Decimal(2)
+
+                getBuyableAmount("t", 11).lte(15) 
+                ? price = price.mul(new Decimal(3).pow(x.sub(getBuyableAmount(this.layer, 14))))
+                : price = price.mul(new Decimal(3).pow(x.sub(getBuyableAmount(this.layer, 14))).mul(1.5))
+
+                if(hasMilestone("i", 4)){
+                    price = price.div(player["i"].points.add().ln().add(1))
+                }
+
+                return {samen: price}},
             effect(x) {
                 return new Decimal(1.2).pow(x)
             },
@@ -100,9 +118,18 @@ addLayer('t', {
         }, 
         13: {
             title: "Grüntee",
-            cost(x) { return {samen: getBuyableAmount("t", 13).lte(5)
-                ? new Decimal(50).mul(new Decimal(20).pow(x.sub(getBuyableAmount(this.layer, 14))))
-                : new Decimal(50).mul(new Decimal(20).pow(x.sub(getBuyableAmount(this.layer, 14)).mul(1.5)))}},
+            cost(x) {
+                let price = new Decimal(50)
+
+                getBuyableAmount("t", 11).lte(15) 
+                ? price = price.mul(new Decimal(20).pow(x.sub(getBuyableAmount(this.layer, 14))))
+                : price = price.mul(new Decimal(20).pow(x.sub(getBuyableAmount(this.layer, 14))).mul(1.5))
+
+                if(hasMilestone("i", 4)){
+                    price = price.div(player["i"].points.add().ln().add(1))
+                }
+
+                return {samen: price}},
             effect(x) {
                 return (x.mul(0.05)).add(1)
             },
@@ -119,9 +146,18 @@ addLayer('t', {
         }, 
         14: {
             title: "Matchatee", 
-            cost(x) {return {samen: getBuyableAmount("t", 14).lte(5)
-                ? new Decimal(100).mul(new Decimal(10).pow(x))
-                : new Decimal(100).mul(new Decimal(10).pow(x.mul(1.5)))}}, 
+            cost(x) {
+                let price = new Decimal(100)
+
+                getBuyableAmount("t", 11).lte(15) 
+                ? price = price.mul(new Decimal(10).pow(x))
+                : price = price.mul(new Decimal(10).pow(x).mul(1.5))
+
+                if(hasMilestone("i", 4)){
+                    price = price.div(player["i"].points.add().ln().add(1))
+                }
+
+                return {samen: price}},
             effect(x){return x},
             style: {
                 "border-radius": "0%",
