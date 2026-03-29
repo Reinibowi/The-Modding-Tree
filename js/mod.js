@@ -3,7 +3,16 @@ let modInfo = {
 	id: "tofl_tree",
 	author: "Kuro",
 	pointsName: "Euro",
-	modFiles: ["layers.js", "tree.js"],
+	modFiles: [
+		"layers/t.js",
+		"layers/h.js", 
+		"layers/k.js",
+		"layers/b.js",
+		"layers/i.js",
+		"layers/lore.js",
+		"layers/debug.js",
+		"tree.js"
+	],
 
 	discordName: "",
 	discordLink: "",
@@ -87,7 +96,8 @@ function getPointGen() {
 
 	if (hasUpgrade("b", 11)) gain = gain.add(0.1)
 	if (hasUpgrade("b", 14)) gain = gain.mul(upgradeEffect("b", 14))
-	
+	if (hasUpgrade("b", 23)) gain = gain.mul(upgradeEffect("b", 23))
+
 	gain = gain.mul(layers["b"].euroBoost())
 
 	//Immobilien
