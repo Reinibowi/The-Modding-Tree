@@ -11,7 +11,8 @@ addLayer("k", {
             price: new Decimal(5), 
             gachaCost: new Decimal(1),
             lastWin: "nothing",
-            timesWon: new Decimal(0)
+            timesWon: new Decimal(0),
+            effective13level: new Decimal(0)
         }
     }, 
     color: "aqua",
@@ -33,9 +34,12 @@ addLayer("k", {
 
         if(hasMilestone("i", 2)) priceGain = priceGain.mul(player["i"].points.lte(10) ? player["i"].points : 10)
 
+        priceGain = priceGain.mul(new Decimal(5).pow(getBuyableAmount(this.layer, 21)))
+
         player[this.layer].price = priceGain
 
         maxPityGain = maxPityGain.mul(new Decimal(0.5).pow(getBuyableAmount("k", 13)))
+
         player[this.layer].maxPity = maxPityGain.mul(2)
     },
 
@@ -89,6 +93,27 @@ addLayer("k", {
             description() {return "Gacha multipliziert Europroduktion: *log(Gacha+1)\n\n Aktuell: "+format(this.effect())}, 
             effect() {return (new Decimal(player[this.layer].points)).add(1).log10().add(1)},
             cost: new Decimal(500)
+        },
+        21: {
+            description() {return "Gewonnene Gachas multiplizieren Europroduktion. \n Aktuell: *" +format(this.effect())}, 
+            effect() {return player[this.layer].timesWon.add(1).ln().add(1)},
+            cost: new Decimal(150), 
+            unlocked() {return hasMilestone("i", 5)}
+        }, 
+        22: {
+            description: "Schalte Gacha-Reset frei.",
+            cost: new Decimal(1000), 
+            unlocked() {return hasMilestone("i", 5)}
+        }, 
+        23: {
+            description: "Jeder verlorener Gacha-pull hat eine Chance dir das Gacha zurückzugeben.", 
+            cost: new Decimal(20), 
+            unlocked() {return hasMilestone("i", 5)}
+        }, 
+        24: {
+            description: "Schalte Super-Gacha frei.", 
+            cost: new Decimal(100), 
+            unlocked() {return hasMilestone("i", 5)}
         }
     }, 
 
@@ -112,7 +137,13 @@ addLayer("k", {
             display() {return "GACHA GACHA GACHA: Rolle für Euros.\n\nAktuelle Gewinnchance: "+ format(player[this.layer].gachaChance) +"% \n\nAktueller Preis: " + format(player[this.layer].price) + " Euro\n\nKosten: " + format(player[this.layer].gachaCost + " Gacha")},
             canClick() {return player[this.layer].points.gte(player[this.layer].gachaCost)}, 
             onClick() {
-                player[this.layer].points = player[this.layer].points.sub(player[this.layer].gachaCost)
+                if(hasUpgrade(this.layer, 23)){
+                    if(Math.random()*100 >= 10){
+                        player[this.layer].points = player[this.layer].points.sub(player[this.layer].gachaCost)
+                    }
+                }else{
+                    player[this.layer].points = player[this.layer].points.sub(player[this.layer].gachaCost)
+                }
                 let number = 0
                 number = Math.random()*100 
                 if(player[this.layer].gachaChance.gte(100-number)){
@@ -167,13 +198,27 @@ addLayer("k", {
         13:{
             title: "Updates",
             display() {return "Reduziert maximales Pity um 50%\n\nKosten: " + format(this.cost().gacha)+ " Gacha"},
-            cost(x) {return {gacha: new Decimal(20).mul(new Decimal(1.76).pow(x))}},
+            cost(x) {return {gacha: new Decimal(20).mul(new Decimal(1.76).pow(x.add(player[this.layer].effective13level)))}},
             canAfford() {return player[this.layer].points.gte(this.cost().gacha)},
             buy(){
                 player[this.layer].points = player[this.layer].points.sub(this.cost().gacha)
                 setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
             },
             unlocked() {return hasUpgrade(this.layer, 12)},
+        }, 
+        21:{
+            title: "Gacha-Reset", 
+            display() {return "Setze die Gacha-Chance und maximales Pity zurück aber verfünfache das Preisgeld. \nBenötigt: Maximales Pity kleiner als 3"}, 
+            cost(x) {return new Decimal(0)}, 
+            canAfford() {return player[this.layer].maxPity.lte(3)}, 
+            buy(){
+                player[this.layer].gachaChance = new Decimal(1), 
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+                player[this.layer].effective13level = player[this.layer].effective13level.add(getBuyableAmount(this.layer, 13))
+                setBuyableAmount(this.layer, 13, new Decimal(0))
+
+            }, 
+            unlocked() {return hasUpgrade(this.layer, 22)}
         }
     }, 
 

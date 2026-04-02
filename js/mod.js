@@ -91,6 +91,7 @@ function getPointGen() {
 
 	if (hasUpgrade("k", 11)) gain = gain.add(0.1)
 	if (hasUpgrade("k", 14)) gain = gain.mul(upgradeEffect("k", 14))
+	if (hasUpgrade("k", 21)) gain = gain.mul(upgradeEffect("k", 21))
 
 	//Brontalo
 
