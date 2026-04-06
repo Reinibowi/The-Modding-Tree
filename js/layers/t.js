@@ -56,9 +56,27 @@ addLayer('t', {
             description() {return "Samen multiplizieren Europroduktion: *log(Samen+1)\n\n Aktuell: "+format(this.effect())}, 
             effect() {return (new Decimal(player[this.layer].points)).add(1).log10().add(1)},
             cost: new Decimal(500)
+        }, 
+        21: {
+            description: "Verbessert die Basis von Minzetee um +0.1, die Basis von Früchtetee um +0.1 und die Basis von +0.05", 
+            cost: new Decimal(250)
+        }, 
+        22: {
+            description: "Schaltet Oolong-Tee frei.", 
+            cost: new Decimal(1000)
+        }, 
+        23: {
+            description: "Schaltet Kühe frei.", 
+            cost: new Decimal(500)
+        }, 
+        24: {
+            description: "Die Gesamtanzahl von allen Tees reduziert den Immobilienpreis.", 
+            cost: new Decimal(2000)
         }
     },
 
+
+    //Buyables müssen noch im Display die neuen Zahlen angezeigt kriegen.
 
     buyables: {
         11: {
@@ -76,12 +94,17 @@ addLayer('t', {
 
                 return {samen: price}},
             effect(x) {
-                return (new Decimal(0.1)).mul(x)
+                if(hasUpgrade(this.layer, 21)){
+                    return (new Decimal(0.2)).mul(x)
+                }else{
+                    return (new Decimal(0.1)).mul(x)
+                }
+                
             },
             style: {
                 "border-radius": "0%",
             },
-            display() { return "Starte Euro-Generation.\n +"+ format(new Decimal(0.1)) + "/sec per level.\n\n Aktuell:  " + format(this.effect()) + " Euro/sec\n\nKosten: " + format(this.cost().samen) + " Samen" },
+            display() { return "Starte Euro-Generation.\n +0.1/sec per level.\n\n Aktuell:  " + format(this.effect()) + " Euro/sec\n\nKosten: " + format(this.cost().samen) + " Samen" },
             canAfford() { return player[this.layer].points.gte(this.cost().samen) },
             buy() {
                 player[this.layer].points = player[this.layer].points.sub(this.cost().samen)
@@ -103,7 +126,12 @@ addLayer('t', {
 
                 return {samen: price}},
             effect(x) {
-                return new Decimal(1.2).pow(x)
+                if(hasUpgrade(this.layer, 21)){
+                    return new Decimal(1.3).pow(x)
+                }else{
+                    return new Decimal(1.2).pow(x)
+                }
+                
             },
             style: {
                 "border-radius": "0%",
@@ -131,7 +159,12 @@ addLayer('t', {
 
                 return {samen: price}},
             effect(x) {
-                return (x.mul(0.05)).add(1)
+                if(hasUpgrade(this.layer, 21)){
+                    return (x.mul(0.1)).add(1)
+                }else{
+                    return (x.mul(0.05)).add(1)
+                }
+                
             },
             style: {
                 "border-radius": "0%",

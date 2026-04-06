@@ -11,8 +11,19 @@ addLayer("k", {
             price: new Decimal(5), 
             gachaCost: new Decimal(1),
             lastWin: "nothing",
+
             timesWon: new Decimal(0),
-            effective13level: new Decimal(0)
+
+            effective13level: new Decimal(0),
+
+            superGachaChance: new Decimal(1), 
+            superPity: new Decimal(0), 
+            superMaxPity: new Decimal(200),
+            superPrice: new Decimal(20), 
+            superGachaCost: new Decimal(1),
+            superLastWin: "nothing",
+
+            superTimesWon: new Decimal(0)
         }
     }, 
     color: "aqua",
@@ -27,6 +38,8 @@ addLayer("k", {
     update(){
         let priceGain = new Decimal(5)
         let maxPityGain = new Decimal(100)
+        let superPriceGain = new Decimal(20)
+        let superMaxPityGain = new Decimal(100)
 
         priceGain = priceGain.mul(new Decimal(1.15).pow(getBuyableAmount("k", 11)))
         
@@ -38,9 +51,20 @@ addLayer("k", {
 
         player[this.layer].price = priceGain
 
+
         maxPityGain = maxPityGain.mul(new Decimal(0.5).pow(getBuyableAmount("k", 13)))
 
         player[this.layer].maxPity = maxPityGain.mul(2)
+
+
+        superPriceGain = superPriceGain.mul(new Decimal(1.15).pow(getBuyableAmount("k", 31)))
+
+        player[this.layer].superPrice = superPriceGain
+
+
+        superMaxPityGain = superMaxPityGain.mul(new Decimal(0.5).pow(getBuyableAmount("k", 33)))
+
+        player[this.layer].superMaxPity = superMaxPityGain.mul(2)
     },
 
     tabFormat:{
@@ -48,7 +72,7 @@ addLayer("k", {
             content: ["main-display", "blank", "prestige-button", "blank", "upgrades"]
         },
         "Gacha": {
-            content: ["main-display", "blank", ["bar", "pityBar"], "blank", "clickables", 
+            content: ["main-display", "blank", ["bar", "pityBar"], "blank", ["clickable", 11], 
             "blank", ["display-text", 
                 function() {
                     if (player[this.layer].lastWin == "nothing"){
@@ -68,8 +92,35 @@ addLayer("k", {
                 function() {
                     return "Du hast bereits " + format(player[this.layer].timesWon) + " Mal gewonnen!"
                 }
-            ], "blank", "buyables"]
+            ], "blank", ["row", [["buyable", 11] ,["buyable", 12], ["buyable", 13]]], ["row", [["buyable", 21]]]]
+
         }, 
+        "Super-Gacha": {
+            content: ["main-display", "blank", ["display-text", 
+                function() {
+                    return "Du hast bereits " + format(player[this.layer].timesWon) + " Mal gewonnen!"
+                }
+            ], "blank", ["bar", "superPityBar"], "blank", ["clickable", 21], "blank", ["display-text", 
+                function() {
+                    if (player[this.layer].superLastWin == "nothing"){
+                        return ""
+                    }
+                    if (player[this.layer].superLastWin == "win"){
+                        return "Du hast gewonnen! Preisgeld erhalten!"
+                    }
+                    if (player[this.layer].superLastWin == "lose"){
+                        return "Du hast verloren."
+                    }
+                    if (player[this.layer].superLastWin == "pity"){
+                        return "Du hast das maximale Pity erreicht. Preisgeld erhalten."
+                    }
+                }
+            ], "blank", ["display-text", 
+                function() {
+                    return "Du hast Super-Gacha bereits " + format(player[this.layer].superTimesWon) + " Mal gewonnen."
+                }], "blank", ["row", [["buyable", 31] ,["buyable", 32], ["buyable", 33]]]],
+            unlocked() {return hasUpgrade("k", 24)}
+        },
         "Erklärung": {
             content: [["infobox", "gacha"]]
         }
@@ -129,10 +180,22 @@ addLayer("k", {
             progress() {return new Decimal(player[this.layer].pity).div(player[this.layer].maxPity)},
             unlocked: true,
         },
+        superPityBar:{
+            direction: RIGHT,
+            width: 500,
+            height: 50,
+            fillStyle: {
+                "background-color": "blue",
+            },
+            display() {return "Super-Gacha-pity: " + format(player[this.layer].superPity) + "/" + format(player[this.layer].superMaxPity)},
+            progress() {return new Decimal(player[this.layer].superPity).div(player[this.layer].superMaxPity)},
+            unlocked: true,
+        }
     },
 
     clickables: {
         11:{
+            id: "gacha",
             title: "GACHA!", 
             display() {return "GACHA GACHA GACHA: Rolle für Euros.\n\nAktuelle Gewinnchance: "+ format(player[this.layer].gachaChance) +"% \n\nAktueller Preis: " + format(player[this.layer].price) + " Euro\n\nKosten: " + format(player[this.layer].gachaCost + " Gacha")},
             canClick() {return player[this.layer].points.gte(player[this.layer].gachaCost)}, 
@@ -167,6 +230,40 @@ addLayer("k", {
                 "height": "100px", 
                 "border-radius": "1%"
             }
+        }, 
+        21:
+        {
+            id: "superGacha",
+            title: "SUPER-GACHA!",
+            display() { return "GACHA GACHA GACHA: Rolle für Gacha!\nDas Super-Gacha verbraucht Siege im normalen Gacha und rollt für Gacha.\n\nAktuelle Gewnnchance: " + format(player[this.layer].superGachaChance) +"%\nAktuelles Preisgeld: "+ format(player[this.layer].superPrice) + "Gacha\nKosten: " +format(player[this.layer].superGachaCost) + "Gacha-Siege"},
+            canClick() {return player[this.layer].timesWon.gte(1)},
+            style: {
+                "width": "300px", 
+                "height": "100px", 
+                "border-radius": "1%"
+            },
+            onClick(){
+                player[this.layer].timesWon = player[this.layer].timesWon.sub(player[this.layer].superGachaCost)
+
+                let number = 0
+                number = Math.random()*100 
+                if(player[this.layer].superGachaChance.gte(100-number)){
+                    player[this.layer].points = player[this.layer].points.add(player[this.layer].superPrice)
+                    player[this.layer].superPity = new Decimal(0)
+                    player[this.layer].superTimesWon = player[this.layer].superTimesWon.add(1)
+                    player[this.layer].superLastWin = "win"
+                }else{
+                    player[this.layer].superPity = player[this.layer].superPity.add(1)
+                    player[this.layer].superLastWin = "lose"
+                    if (player[this.layer].superPity.gte(player[this.layer].superMaxPity)) {
+                        player[this.layer].superPity = new Decimal(0)
+                        player[this.layer].superTimesWon = player[this.layer].superTimesWon.add(1)
+                        player[this.layer].points = player[this.layer].points.add(player[this.layer].superPrice)
+                        player[this.layer].superLastWin = "pity"
+                    }
+                }
+            }
+
         }
     },
 
@@ -219,7 +316,38 @@ addLayer("k", {
 
             }, 
             unlocked() {return hasUpgrade(this.layer, 22)}
-        }
+        }, 
+        31:{
+            title: "Super spezielle Banner",
+            display() {return "Erhöht das Superpreisgeld um 15%\n\nKosten: " + format(this.cost().gacha)+ " Gacha"},
+            cost(x) {return {gacha: new Decimal(100).mul(new Decimal(1.2).pow(x))}},
+            canAfford() {return player[this.layer].points.gte(this.cost().gacha)},
+            buy(){
+                player[this.layer].points = player[this.layer].points.sub(this.cost().gacha)
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+        }, 
+        32:{
+            title: "Geld investieren",
+            display() {return "Verbessert die Chance auf gewinnen\n\nKosten: " + format(this.cost().gacha)+ " Gacha"},
+            cost(x) {return {gacha: new Decimal(300).mul(new Decimal(3).pow(x))}},
+            canAfford() {return player[this.layer].points.gte(this.cost().gacha)},
+            buy(){
+                player[this.layer].points = player[this.layer].points.sub(this.cost().gacha)
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+                player[this.layer].superGachaChance = player[this.layer].superGachaChance.add((new Decimal(100).sub(new Decimal(player[this.layer].superGachaChance))).mul(0.05))
+            },
+        },
+        33:{
+            title: "Updates",
+            display() {return "Reduziert maximales Pity um 50%\n\nKosten: " + format(this.cost().gacha)+ " Gacha"},
+            cost(x) {return {gacha: new Decimal(4000).mul(new Decimal(1.76).pow(x))}},
+            canAfford() {return player[this.layer].points.gte(this.cost().gacha)},
+            buy(){
+                player[this.layer].points = player[this.layer].points.sub(this.cost().gacha)
+                setBuyableAmount(this.layer, this.id, getBuyableAmount(this.layer, this.id).add(1))
+            },
+        }, 
     }, 
 
     infoboxes: {

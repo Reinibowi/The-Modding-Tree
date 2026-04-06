@@ -104,6 +104,7 @@ function getPointGen() {
 	//Immobilien
 
 	if (hasMilestone("i", 0)) gain = gain.mul(3)
+	if (hasMilestone("i", 6)) gain = gain.mul(player["i"].points.sqrt())
 
 	return gain
 }
